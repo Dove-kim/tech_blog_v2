@@ -3,6 +3,10 @@ const fs = require('fs');
 let rawdata = fs.readFileSync('config/config.json');
 let setting = JSON.parse(rawdata);
 import './post.scss';
+import dynamic from 'next/dynamic';
+const Comments = dynamic(() => import('../../components/comments'), {
+  ssr: false,
+});
 
 export async function getStaticPaths() {
   let res = null;
@@ -59,6 +63,7 @@ const Post = ({ postNo, post }) => {
           }}
         />
       </div>
+      <Comments />
     </Layout>
   );
 };
