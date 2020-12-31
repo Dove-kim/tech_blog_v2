@@ -106,3 +106,5 @@ dist
 #config file
 
 config/
+
+public/blog_img/
