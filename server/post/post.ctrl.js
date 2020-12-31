@@ -6,7 +6,9 @@ let setting = JSON.parse(rawdata);
 
 exports.list = async (req, res) => {
   let data;
-  data = await db.excute('select * from post order by post.createdAt desc;');
+  data = await db.excute(
+    'select post.no as no, post.title as title, post.body as body, post.createdAt as createdAt, category.name as category from post inner join category on category.no=post.category order by post.createdAt desc;',
+  );
 
   res.send(data);
 };
@@ -25,6 +27,8 @@ exports.write = async (req, res) => {
         'update post set title=?, body=?,category=? where no =?',
         [data.title, data.body, data.category, data.id],
       );
+      res.send({ result: 'yes' });
+      return;
     } else {
       let sql = await db.excute(
         'insert into post (title,body,category) values(?,?,?)',
@@ -44,7 +48,10 @@ exports.write = async (req, res) => {
 exports.read = async (req, res) => {
   const postId = req.params.postId;
 
-  let data = await db.excute('select * from post where no=?', [postId]);
+  let data = await db.excute(
+    'select post.no as no, post.title as title, post.body as body, post.createdAt as createdAt, category.name as category, category.no as cate from post inner join category on category.no=post.category where post.no=?',
+    [postId],
+  );
 
   res.send(data.length > 0 ? data[0] : { result: false });
 };

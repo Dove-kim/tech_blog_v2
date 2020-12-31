@@ -1,15 +1,17 @@
 import './postItem.scss';
-import Link from 'next/link';
+import moment from 'moment';
 
-const PostItem = ({ title, postNo, text, date }) => {
+const PostItem = ({ title, postNo, category, date, body }) => {
+  const go = () => {
+    window.location.href = '/post/' + postNo;
+  };
+
   return (
-    <div className={'PostItem'}>
-      <Link href={'/post/' + postNo}>
-        <h1>{title}</h1>
-      </Link>
+    <div className="PostItem" onClick={go}>
+      <h1>{title}</h1>
 
-      <h2>{text}</h2>
-      <span>{date}</span>
+      <h2>{body.replace(/<[^>]*>?/gm, '').slice(0, 200)}</h2>
+      <span>{moment(date).format('YYYY-MM-DD')}</span>
     </div>
   );
 };

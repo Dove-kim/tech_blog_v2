@@ -30,7 +30,8 @@ const Index = ({ posts }) => {
             key={post.no}
             postNo={post.no}
             title={post.title}
-            text={post.category}
+            category={post.category}
+            body={post.body}
             date={post.createdAt}
           />
         ))}

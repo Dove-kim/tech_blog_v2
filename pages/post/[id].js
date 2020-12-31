@@ -51,13 +51,13 @@ const Post = ({ postNo, post }) => {
     <Layout>
       <div className="Post_page">
         <div className="Title">{post.title}</div>
+        <div className="category">{post.category}</div>
         <div
-          className="ql-editor"
+          className="ql-snow ql-editor body"
           dangerouslySetInnerHTML={{
             __html: post.body,
           }}
         />
-        <div className=" ">{post.category}</div>
       </div>
     </Layout>
   );

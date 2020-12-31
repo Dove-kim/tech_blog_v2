@@ -236,9 +236,8 @@ const Editor = ({ postno }) => {
         setTitle(data.title);
         setPost_no(data.no);
         document.getElementById('selectedCategory').innerHTML =
-          '선택된 카테고리: ' +
-          document.getElementById(data.category + '').innerHTML;
-        setCate(data.category);
+          '선택된 카테고리: ' + data.category;
+        setCate(data.cate);
         console.log(data.body);
         quillinstance.current.root.innerHTML = data.body;
       });
