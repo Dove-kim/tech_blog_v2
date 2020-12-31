@@ -10,11 +10,11 @@ const Header = () => {
     <div className="Header">
       <Head>
         <title>DovePot</title>
-        <link rel="icon" href="pngegg.png"></link>
+        <link rel="icon" href="/pngegg.png"></link>
       </Head>
       <div className="wrapper" onClick={getBacktoMain}>
         <p className="logo">Dove의 테크 항아리</p>
-        <img src="pngegg.png"></img>
+        <img src="/pngegg.png"></img>
       </div>
     </div>
   );
