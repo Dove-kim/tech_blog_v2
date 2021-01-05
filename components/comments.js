@@ -11,6 +11,7 @@ export default class Comments extends Component {
     script.setAttribute('issue-term', 'pathname');
     script.setAttribute('theme', 'github-light');
     anchor.appendChild(script);
+    document.getElementById('back').style.display = 'block';
   }
 
   render() {

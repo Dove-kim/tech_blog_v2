@@ -5,8 +5,7 @@ let rawdata = fs.readFileSync('config/config.json');
 let setting = JSON.parse(rawdata);
 const multer = require('multer');
 
-const port = 8080;
-const dev = true;
+const port = 7070;
 const app = next({ dev: setting.dev });
 const handle = app.getRequestHandler();
 
@@ -43,6 +42,7 @@ app.prepare().then(() => {
   server.use('/api/auth', require('./auth'));
   server.use('/api/post', require('./post'));
   server.use('/api/category', require('./category'));
+  server.use('/blog_img', express.static('public/blog_img'));
 
   server.all('*', (req, res) => {
     return handle(req, res);

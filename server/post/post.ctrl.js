@@ -6,8 +6,19 @@ let setting = JSON.parse(rawdata);
 
 exports.list = async (req, res) => {
   let data;
+  let category = req.query.category ? req.query.category : -1;
+  if (category == 0) {
+    data = await db.excute(
+      `select post.no as no, post.title as title, post.body as body, post.createdAt as createdAt, category.no as cate, category.name as category from post inner join category on category.no=post.category where post.category=0 order by post.createdAt desc;`,
+    );
+
+    res.send(data);
+  }
+
   data = await db.excute(
-    'select post.no as no, post.title as title, post.body as body, post.createdAt as createdAt, category.name as category from post inner join category on category.no=post.category order by post.createdAt desc;',
+    `select post.no as no, post.title as title, post.body as body, post.createdAt as createdAt, category.no as cate, category.name as category from post inner join category on category.no=post.category where post.category!=1 ${
+      category >= 0 ? ` and post.category=${category}` : ''
+    } order by post.createdAt desc;`,
   );
 
   res.send(data);

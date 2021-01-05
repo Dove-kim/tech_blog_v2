@@ -1,4 +1,5 @@
 .Title {
+  margin-top: 2rem;
   font-size: 3rem;
   font-weight: bold;
   line-height: 1.5;
@@ -6,12 +7,10 @@
 }
 
 .category {
-  border-radius: 5px;
   font-weight: 1000;
-  color: white;
-  background-color: rgb(17, 146, 233);
+  color: black;
   display: inline;
-  padding: 0.5rem;
+  margin: 2rem;
 }
 
 .body {

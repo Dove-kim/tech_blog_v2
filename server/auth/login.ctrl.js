@@ -1,4 +1,4 @@
-const moment = require('moment-timezone');
+const moment = require('moment');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 

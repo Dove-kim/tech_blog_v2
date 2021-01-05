@@ -121,8 +121,6 @@ const Editor = ({ postno }) => {
     if (data.length > 0) {
       innerHTML = await Base64toServerImage(quill.root.innerHTML, data);
     }
-    console.log(innerHTML);
-    console.log(formDataArr);
 
     axios
       .post('/api/post', {
@@ -142,8 +140,10 @@ const Editor = ({ postno }) => {
           });
           alert('업로드 성공');
           window.location.href = '/';
+          return;
         }
         alert('업로드 실패..');
+        return;
       });
   }, [title, post_no, cate]);
 
@@ -161,6 +161,7 @@ const Editor = ({ postno }) => {
           if (data.result == 'yes') {
             alert('삭제완료');
             window.location.href = '/';
+            return;
           }
         });
     }
