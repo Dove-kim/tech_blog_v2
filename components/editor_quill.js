@@ -1,60 +1,13 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import Editor from 'ckeditor5-custom-build/build/ckeditor';
-import { CKEditor } from '@ckeditor/ckeditor5-react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
+import Quill from 'quill';
 
-import jsCookie from 'js-cookie';
-import axios from 'axios';
+import ImageResize from 'quill-image-resize-module-react';
+Quill.register('modules/imageResize', ImageResize);
+
 import './editor.scss';
+import jsCookie from 'js-cookie';
 import WriteActionButton from './WriteActionButton';
-
-const editorConfiguration = {
-  toolbar: {
-    items: [
-      'heading',
-      '|',
-      'bold',
-      'link',
-      'italic',
-      'bulletedList',
-      'numberedList',
-      '|',
-      'alignment',
-      'indent',
-      'outdent',
-      'blockQuote',
-      'codeBlock',
-      'code',
-      '|',
-      'fontSize',
-      'horizontalLine',
-      'highlight',
-      '|',
-      'imageInsert',
-      'mediaEmbed',
-      'insertTable',
-      '|',
-      'undo',
-      'redo',
-      '|',
-      'MathType',
-      'ChemType',
-      'underline',
-    ],
-  },
-  language: 'ko',
-  image: {
-    toolbar: ['imageTextAlternative', 'imageStyle:full', 'imageStyle:side'],
-  },
-  table: {
-    contentToolbar: [
-      'tableColumn',
-      'tableRow',
-      'mergeTableCells',
-      'tableCellProperties',
-      'tableProperties',
-    ],
-  },
-};
+import axios from 'axios';
 
 // <p><img ~~~/></p> 형태에서 img의 src수정
 function Base64toServerImage(fullstring, data) {
@@ -62,11 +15,11 @@ function Base64toServerImage(fullstring, data) {
 
   let count = 0;
   for (let i in changeStr) {
-    if (changeStr[i].includes('<img')) {
-      if (changeStr[i].includes('https') || changeStr[i].includes('https')) {
-        changeStr[i] += '>';
-        continue;
-      }
+    if (changeStr[i].includes('<p')) {
+      changeStr[i] += '>';
+    } else if (changeStr[i].includes('</p')) {
+      changeStr[i] += '>';
+    } else if (changeStr[i].includes('<img')) {
       if (data[count].ori) {
         changeStr[i] = "<img src='" + data[count].name + "'>";
       } else {
@@ -77,13 +30,10 @@ function Base64toServerImage(fullstring, data) {
           (data[count].hasOpt ? ' width' + data[count].option : '') +
           '>';
       }
-    } else {
-      changeStr[i] += '>';
     }
   }
 
-  let result = changeStr.filter((v) => v !== false).join('');
-  return result.substring(0, result.length - 1);
+  return changeStr.filter((v) => v !== false).join('');
 }
 
 //이미지 데이터를 blob으로 변환
@@ -100,79 +50,41 @@ function DataURIToBlob(dataURI) {
   return new Blob([ia], { type: mimeString });
 }
 
-const EditorView = ({ postno }) => {
-  const [context, setContext] = useState('');
+const Editor = ({ postno }) => {
+  const quillElement = useRef(null);
+  const quillinstance = useRef(null);
   const [title, setTitle] = useState('');
   const [post_no, setPost_no] = useState(-1);
   const [categoryList, setCategoryList] = useState('');
   const [cate, setCate] = useState(-1);
 
-  useEffect(async () => {
-    if (jsCookie.get('token')) {
-      axios.put('/api/auth', { token: jsCookie.get('token') }).then((data) => {
-        data = data.data;
-        if (data.result == 'yes') {
-          document.getElementById('modalDiv').style.display = 'none';
-        } else {
-          jsCookie.remove('token', { path: '' });
-        }
-      });
-    }
-    setPost_no(postno);
-    if (postno > 0) {
-      axios.get('/api/post/' + postno).then((data) => {
-        data = data.data;
-        if (data.result) {
-          window.location.href = '/';
-        }
-        setTitle(data.title);
-        setPost_no(data.no);
-        document.getElementById('selectedCategory').innerHTML =
-          '선택된 카테고리: ' + data.category;
-        setCate(data.cate);
-        console.log(data.body);
-        setContext(data.body);
-      });
-    }
-    await axios.get('/api/category').then((data) => {
-      data = data.data;
-      let items;
-      items = data.map((data) => (
-        <div key={data.no} onClick={onCeteChange} id={data.no}>
-          {data.name}
-        </div>
-      ));
-      setCategoryList(items);
-    });
-  }, []);
-
   const onSave = useCallback(async () => {
-    /*if (cate < 0) {
+    if (cate < 0) {
       alert('카테고리를 선택하세요');
       return;
-    }*/
-    console.log(context);
+    }
+    const quill = quillinstance.current;
     const data = [];
 
-    const content = context;
-    const base64Data = content
+    const base64Data = quill.root.innerHTML
       .split('src=')
       .filter((v) => v.startsWith('"data') || v.startsWith("'blog_img"))
       .map((v) => {
-        if (v.includes('blog_img')) {
+        if (v.includes('width')) {
+          return (
+            v.split('width')[0].substring(0, v.split('width')[0].length - 2) +
+            '>>1>>' +
+            v.split('width')[1].split('>')[0].replace(/\"/gi, "'")
+          );
+        } else if (v.includes('blog_img')) {
           //사진이 존재함
-          return v;
-        } else if (v.startsWith('"https') || v.startsWith('"https')) {
-          //사진이 url구조
           return v;
         } else {
           return (
-            v.split('>')[0].substring(1, v.split('>')[0].length - 1) + '>>0'
+            v.split('>')[0].substring(0, v.split('>')[0].length - 1) + '>>0'
           );
         }
       });
-    console.log(base64Data);
-
     const formDataArr = [];
     let hasOption = false;
     if (base64Data.length > 0) {
@@ -205,12 +117,10 @@ const EditorView = ({ postno }) => {
         formDataArr.push(formData);
       }
     }
-    let innerHTML = content;
-
+    let innerHTML = quill.root.innerHTML;
     if (data.length > 0) {
-      innerHTML = await Base64toServerImage(content, data);
+      innerHTML = await Base64toServerImage(quill.root.innerHTML, data);
     }
-    console.log(innerHTML);
 
     axios
       .post('/api/post', {
@@ -235,7 +145,7 @@ const EditorView = ({ postno }) => {
         alert('업로드 실패..');
         return;
       });
-  }, [title, post_no, cate, context]);
+  }, [title, post_no, cate]);
 
   const onDelete = useCallback(() => {
     if (post_no < 0) {
@@ -273,13 +183,67 @@ const EditorView = ({ postno }) => {
     [cate],
   );
 
-  const onChange = useCallback(
-    async (event, editor) => {
-      setContext(await editor.getData());
-    },
+  useEffect(async () => {
+    setPost_no(postno);
+    if (jsCookie.get('token')) {
+      axios.put('/api/auth', { token: jsCookie.get('token') }).then((data) => {
+        data = data.data;
+        if (data.result == 'yes') {
+          document.getElementById('modalDiv').style.display = 'none';
+        } else {
+          jsCookie.remove('token', { path: '' });
+        }
+      });
+    }
 
-    [context],
-  );
+    await axios.get('/api/category').then((data) => {
+      data = data.data;
+      let items;
+      items = data.map((data) => (
+        <div key={data.no} onClick={onCeteChange} id={data.no}>
+          {data.name}
+        </div>
+      ));
+      setCategoryList(items);
+    });
+
+    quillinstance.current = new Quill(quillElement.current, {
+      theme: 'snow',
+      placeholder: '내용을 작성하세요',
+      modules: {
+        toolbar: [
+          [{ header: [1, 2, 3, 4, 5, 6, false] }],
+          [{ size: ['small', false, 'large', 'huge'] }],
+          ['bold', 'italic', 'underline', 'strike'],
+          [{ color: [] }, { background: [] }],
+          ['blockquote', 'code-block', 'link', 'image'],
+          [{ list: 'ordered' }, { list: 'bullet' }],
+          [{ script: 'sub' }, { script: 'super' }],
+          [{ align: [] }],
+          ['clean'],
+        ],
+        imageResize: {
+          modules: ['Resize', 'DisplaySize'],
+        },
+      },
+    });
+
+    if (postno > 0) {
+      axios.get('/api/post/' + postno).then((data) => {
+        data = data.data;
+        if (data.result) {
+          window.location.href = '/';
+        }
+        setTitle(data.title);
+        setPost_no(data.no);
+        document.getElementById('selectedCategory').innerHTML =
+          '선택된 카테고리: ' + data.category;
+        setCate(data.cate);
+        console.log(data.body);
+        quillinstance.current.root.innerHTML = data.body;
+      });
+    }
+  }, []);
 
   return (
     <div className="EditorBlock">
@@ -294,15 +258,12 @@ const EditorView = ({ postno }) => {
         <div className="dropdown-content">{categoryList}</div>
       </div>
       <div id="selectedCategory"></div>
-      <CKEditor
-        editor={Editor}
-        config={editorConfiguration}
-        data={context}
-        onChange={onChange}
-      />
+      <div className="QuillWrapper">
+        <div ref={quillElement} />
+      </div>
       <WriteActionButton onSave={onSave} onDelete={onDelete} />
     </div>
   );
 };
 
-export default EditorView;
+export default Editor;

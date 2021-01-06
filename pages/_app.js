@@ -1,4 +1,5 @@
 import './_app.scss';
+
 import { useEffect } from 'react';
 
 const App = ({ Component, pageProps }) => {
