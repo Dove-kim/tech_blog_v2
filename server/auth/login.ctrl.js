@@ -1,10 +1,7 @@
 const moment = require('moment');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-
-const fs = require('fs');
-let rawdata = fs.readFileSync('config/config.json');
-let setting = JSON.parse(rawdata);
+let setting = require('../config/config');
 
 exports.login = async (req, res) => {
   try {

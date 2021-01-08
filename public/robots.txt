@@ -1,0 +1,5 @@
+# Group 1
+User-agent: *
+Disallow: /admin
+Disallow: /blog_img/
+Allow: /post/

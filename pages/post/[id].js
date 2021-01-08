@@ -1,6 +1,7 @@
 import Layout from '../../components/layout';
 import './post.scss';
 import dynamic from 'next/dynamic';
+import moment from 'moment';
 
 const EditerView = dynamic(() => import('../../components/post'), {
   ssr: false,
@@ -16,7 +17,13 @@ export const getServerSideProps = async (context) => {
   res = await fetch(`https://tech.dpot.xyz/api/post/${postNo}`);
 
   const post = await res.json();
-  console.log(post);
+
+  if (post.result == false) {
+    return {
+      notFound: true,
+    };
+  }
+  //console.log(post);
   return {
     props: { postNo, post },
   };
@@ -26,8 +33,13 @@ const Post = ({ postNo, post }) => {
   return (
     <Layout>
       <div className="Post_page">
-        <div className="Title">{post.title}</div>
+        <header>
+          <hi className="Title">{post.title}</hi>
+        </header>
         <div className="category">{post.category}</div>
+        <time dateTime="post.category">
+          {moment(post.createdAt).format('YYYY-MM-DD')}
+        </time>
         <EditerView text={post.body} />
         <div
           style={{ display: 'none' }}
@@ -36,7 +48,9 @@ const Post = ({ postNo, post }) => {
           }}
         />
       </div>
-      <Comments />
+      <footer>
+        <Comments />
+      </footer>
     </Layout>
   );
 };

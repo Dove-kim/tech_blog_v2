@@ -1,8 +1,11 @@
 .Title {
-  margin-top: 2rem;
   font-size: 3rem;
   font-weight: bold;
   line-height: 1.5;
+}
+
+header {
+  margin-top: 2rem;
   margin-bottom: 2rem;
 }
 
@@ -15,4 +18,9 @@
 
 .body {
   margin-top: 2rem;
+}
+
+time {
+  float: right;
+  margin-right: 5rem;
 }

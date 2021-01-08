@@ -1,11 +1,10 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Editor from 'ckeditor5-custom-build/build/ckeditor';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 
 import jsCookie from 'js-cookie';
 import axios from 'axios';
 import './editor.scss';
-import WriteActionButton from './WriteActionButton';
 
 const editorConfiguration = {
   toolbar: {
@@ -77,6 +76,7 @@ function Base64toServerImage(fullstring, data) {
           (data[count].hasOpt ? ' width' + data[count].option : '') +
           '>';
       }
+      count++;
     } else {
       changeStr[i] += '>';
     }
@@ -100,7 +100,7 @@ function DataURIToBlob(dataURI) {
   return new Blob([ia], { type: mimeString });
 }
 
-const EditorView = ({ postno }) => {
+const EditorView = () => {
   const [context, setContext] = useState('');
   const [title, setTitle] = useState('');
   const [post_no, setPost_no] = useState(-1);
@@ -108,6 +108,14 @@ const EditorView = ({ postno }) => {
   const [cate, setCate] = useState(-1);
 
   useEffect(async () => {
+    let postno = -1;
+    if (window.location.search.includes('post=')) {
+      postno = Number(window.location.search.split('post=')[1]);
+      setPost_no(postno);
+    } else {
+      setPost_no(-1);
+    }
+    //console.log(postno);
     if (jsCookie.get('token')) {
       axios.put('/api/auth', { token: jsCookie.get('token') }).then((data) => {
         data = data.data;
@@ -118,7 +126,6 @@ const EditorView = ({ postno }) => {
         }
       });
     }
-    setPost_no(postno);
     if (postno > 0) {
       axios.get('/api/post/' + postno).then((data) => {
         data = data.data;
@@ -130,7 +137,7 @@ const EditorView = ({ postno }) => {
         document.getElementById('selectedCategory').innerHTML =
           '선택된 카테고리: ' + data.category;
         setCate(data.cate);
-        console.log(data.body);
+        //console.log(data.body);
         setContext(data.body);
       });
     }
@@ -144,34 +151,48 @@ const EditorView = ({ postno }) => {
       ));
       setCategoryList(items);
     });
+    document.body.onkeydown = function (e) {
+      if (e.ctrlKey && String.fromCharCode(e.keyCode) === 'S') {
+        e.preventDefault();
+      } else if (e.keyCode == 46) {
+        e.preventDefault();
+      }
+    };
   }, []);
 
   const onSave = useCallback(async () => {
-    /*if (cate < 0) {
+    if (cate < 0) {
       alert('카테고리를 선택하세요');
       return;
-    }*/
-    console.log(context);
+    }
+    //console.log(context);
     const data = [];
 
     const content = context;
-    const base64Data = content
+    let base64Data = content
       .split('src=')
-      .filter((v) => v.startsWith('"data') || v.startsWith("'blog_img"))
+      .filter(
+        (v) =>
+          v.startsWith('"data') ||
+          v.startsWith('"/blog_img') ||
+          v.startsWith('"https') ||
+          v.startsWith('"http'),
+      )
       .map((v) => {
         if (v.includes('blog_img')) {
           //사진이 존재함
-          return v;
-        } else if (v.startsWith('"https') || v.startsWith('"https')) {
+          return v.split('>')[0].substring(1, v.split('>')[0].length - 1);
+        } else if (v.startsWith('"https') || v.startsWith('"http')) {
           //사진이 url구조
-          return v;
+          return v.split('"')[1];
         } else {
           return (
             v.split('>')[0].substring(1, v.split('>')[0].length - 1) + '>>0'
           );
         }
       });
-    console.log(base64Data);
+
+    //console.log(base64Data);
 
     const formDataArr = [];
     let hasOption = false;
@@ -182,6 +203,7 @@ const EditorView = ({ postno }) => {
             name: base64Data[i],
             ori: true, //해당이미지는 존재함
           });
+          continue;
         }
         const file = DataURIToBlob(base64Data[i].split('>>')[0]);
         const formData = new FormData();
@@ -210,7 +232,7 @@ const EditorView = ({ postno }) => {
     if (data.length > 0) {
       innerHTML = await Base64toServerImage(content, data);
     }
-    console.log(innerHTML);
+    //console.log(innerHTML, data);
 
     axios
       .post('/api/post', {
@@ -300,7 +322,15 @@ const EditorView = ({ postno }) => {
         data={context}
         onChange={onChange}
       />
-      <WriteActionButton onSave={onSave} onDelete={onDelete} />
+      <div className="WriteActionButton">
+        <button className="SubmitButton" onClick={onSave}>
+          저장
+        </button>
+
+        <button className="SubmitButton" onClick={onDelete}>
+          삭제
+        </button>
+      </div>
     </div>
   );
 };

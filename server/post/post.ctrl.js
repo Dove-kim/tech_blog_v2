@@ -1,8 +1,6 @@
-const db = require('../../config/mysql');
+const db = require('../config/mysql');
 const jwt = require('jsonwebtoken');
-const fs = require('fs');
-let rawdata = fs.readFileSync('config/config.json');
-let setting = JSON.parse(rawdata);
+const setting = require('../config/config');
 
 exports.list = async (req, res) => {
   let data;
@@ -45,7 +43,7 @@ exports.write = async (req, res) => {
         'insert into post (title,body,category) values(?,?,?)',
         [data.title, data.body, data.category],
       );
-      console.log(sql);
+      //console.log(sql);
 
       res.send({ result: 'yes' });
       return;

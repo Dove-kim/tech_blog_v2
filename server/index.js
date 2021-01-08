@@ -1,12 +1,15 @@
 const express = require('express');
 const next = require('next');
-const fs = require('fs');
-let rawdata = fs.readFileSync('config/config.json');
-let setting = JSON.parse(rawdata);
+const setting = require('./config/config');
 const multer = require('multer');
+const nextConfig = require('../next.config'); // next.config.js
 
-const port = 7070;
-const app = next({ dev: setting.dev });
+const port = setting.port;
+const app = next({
+  dev: setting.dev,
+  dir: __dirname + '/../',
+  conf: nextConfig,
+});
 const handle = app.getRequestHandler();
 
 app.prepare().then(() => {
@@ -25,7 +28,7 @@ app.prepare().then(() => {
     storage: multer.diskStorage({
       // set a localstorage destination
       destination: (req, file, cb) => {
-        cb(null, 'public/blog_img/');
+        cb(null, setting.blog_img_src);
       },
       // convert a file name
       filename: (req, file, cb) => {
@@ -34,6 +37,12 @@ app.prepare().then(() => {
       },
     }),
   });
+  /*server.use((req, res, next) => {
+    const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
+    console.log(ip);
+    next();
+  });*/
 
   server.post('/api/uploads', upload.single('img'), (req, res) => {
     res.send('upload' + req.file);
@@ -42,8 +51,11 @@ app.prepare().then(() => {
   server.use('/api/auth', require('./auth'));
   server.use('/api/post', require('./post'));
   server.use('/api/category', require('./category'));
-  server.use('/blog_img', express.static('public/blog_img'));
+  server.use('/', express.static(setting.public_src));
 
+  server.get('/admin/', (req, res) => {
+    return app.render(req, res, '/admin');
+  });
   server.all('*', (req, res) => {
     return handle(req, res);
   });

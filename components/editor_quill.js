@@ -239,7 +239,7 @@ const Editor = ({ postno }) => {
         document.getElementById('selectedCategory').innerHTML =
           '선택된 카테고리: ' + data.category;
         setCate(data.cate);
-        console.log(data.body);
+        //console.log(data.body);
         quillinstance.current.root.innerHTML = data.body;
       });
     }

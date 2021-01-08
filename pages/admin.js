@@ -2,25 +2,31 @@ import axios from 'axios';
 import Layout from '../components/layout';
 import './admin.scss';
 const crypto = require('crypto');
-
 import React from 'react';
+import jsCookie from 'js-cookie';
 import dynamic from 'next/dynamic';
-import { useRouter } from 'next/router';
 const Editor = dynamic(() => import('../components/editor'), {
   ssr: false,
 });
-import jsCookie from 'js-cookie';
 
-const Admin = () => {
-  const router = useRouter();
+export const getServerSideProps = async (context) => {
+  const post = 1;
 
+  return {
+    props: {
+      post,
+    },
+  };
+};
+
+const Admin = ({ post }) => {
   const onEnter = () => {
     if (window.event.keyCode == 13) {
       let password = crypto
         .createHash('sha512')
         .update(document.getElementById('code').value)
         .digest('base64');
-      console.log(password);
+      //console.log(password);
 
       axios.post('/api/auth', { password: password }).then((data) => {
         if (data.data.result === 'yes') {
@@ -53,7 +59,7 @@ const Admin = () => {
           </div>
         </div>
       </div>
-      <Editor postno={router.query.post ? router.query.post : -1} />
+      <Editor />
     </Layout>
   );
 };

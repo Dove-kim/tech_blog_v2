@@ -1,4 +1,4 @@
-const db = require('../../config/mysql');
+const db = require('../config/mysql');
 
 exports.getList = async (req, res) => {
   const data = await db.excute('select * from category');
