@@ -5,6 +5,7 @@ import { CKEditor } from '@ckeditor/ckeditor5-react';
 import jsCookie from 'js-cookie';
 import axios from 'axios';
 import './editor.scss';
+import TagBox from './tagBox';
 
 const editorConfiguration = {
   toolbar: {
@@ -104,8 +105,7 @@ const EditorView = () => {
   const [context, setContext] = useState('');
   const [title, setTitle] = useState('');
   const [post_no, setPost_no] = useState(-1);
-  const [categoryList, setCategoryList] = useState('');
-  const [cate, setCate] = useState(-1);
+  const [localTags, setLocalTags] = useState([]);
 
   useEffect(async () => {
     let postno = -1;
@@ -129,28 +129,17 @@ const EditorView = () => {
     if (postno > 0) {
       axios.get('/api/post/' + postno).then((data) => {
         data = data.data;
-        if (data.result) {
-          window.location.href = '/';
+        console.log(data);
+        if (data.result == false) {
+          //window.location.href = '/';
         }
-        setTitle(data.title);
-        setPost_no(data.no);
-        document.getElementById('selectedCategory').innerHTML =
-          '선택된 카테고리: ' + data.category;
-        setCate(data.cate);
-        //console.log(data.body);
-        setContext(data.body);
+        setTitle(data.post.title);
+        setPost_no(data.post.no);
+        setLocalTags(data.post.tag);
+        setContext(data.post.body);
       });
     }
-    await axios.get('/api/category').then((data) => {
-      data = data.data;
-      let items;
-      items = data.map((data) => (
-        <div key={data.no} onClick={onCeteChange} id={data.no}>
-          {data.name}
-        </div>
-      ));
-      setCategoryList(items);
-    });
+
     document.body.onkeydown = function (e) {
       if (e.ctrlKey && String.fromCharCode(e.keyCode) === 'S') {
         e.preventDefault();
@@ -161,10 +150,6 @@ const EditorView = () => {
   }, []);
 
   const onSave = useCallback(async () => {
-    if (cate < 0) {
-      alert('카테고리를 선택하세요');
-      return;
-    }
     //console.log(context);
     const data = [];
 
@@ -232,13 +217,14 @@ const EditorView = () => {
     if (data.length > 0) {
       innerHTML = await Base64toServerImage(content, data);
     }
-    //console.log(innerHTML, data);
+
+    console.log(localTags);
 
     axios
       .post('/api/post', {
         title: title,
         body: innerHTML.replace(/\"/gi, "'"),
-        category: cate,
+        tags: await localTags.map((data) => [data]),
         id: post_no,
         token: jsCookie.get('token'),
       })
@@ -257,7 +243,7 @@ const EditorView = () => {
         alert('업로드 실패..');
         return;
       });
-  }, [title, post_no, cate, context]);
+  }, [title, post_no, context, localTags]);
 
   const onDelete = useCallback(() => {
     if (post_no < 0) {
@@ -286,21 +272,18 @@ const EditorView = () => {
     [title],
   );
 
-  const onCeteChange = useCallback(
-    (e) => {
-      setCate(e.target.id);
-      document.getElementById('selectedCategory').innerHTML =
-        '선택된 카테고리: ' + e.target.innerHTML;
-    },
-    [cate],
-  );
-
   const onChange = useCallback(
     async (event, editor) => {
       setContext(await editor.getData());
     },
 
     [context],
+  );
+  const setLocalTag = useCallback(
+    (data) => {
+      setLocalTags(data);
+    },
+    [localTags],
   );
 
   return (
@@ -311,11 +294,8 @@ const EditorView = () => {
         placeholder="제목을 입력하세요"
         className="TitleInput"
       />
-      <div className="dropdown">
-        <button className="dropbtn">카테고리</button>
-        <div className="dropdown-content">{categoryList}</div>
-      </div>
-      <div id="selectedCategory"></div>
+
+      <TagBox localTags={localTags} setLocalTags={setLocalTag} />
       <CKEditor
         editor={Editor}
         config={editorConfiguration}

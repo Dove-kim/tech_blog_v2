@@ -2,6 +2,7 @@ import Layout from '../../components/layout';
 import './post.scss';
 import dynamic from 'next/dynamic';
 import moment from 'moment';
+import Head from 'next/head';
 
 const EditerView = dynamic(() => import('../../components/post'), {
   ssr: false,
@@ -14,7 +15,7 @@ export const getServerSideProps = async (context) => {
   const postNo = context.params.id;
   let res = null;
 
-  res = await fetch(`https://tech.dpot.xyz/api/post/${postNo}`);
+  res = await fetch(`https://front.dpot.xyz/api/post/${postNo}`);
 
   const post = await res.json();
 
@@ -25,19 +26,29 @@ export const getServerSideProps = async (context) => {
   }
   //console.log(post);
   return {
-    props: { postNo, post },
+    props: { postNo, post: post.post },
   };
 };
 
 const Post = ({ postNo, post }) => {
   return (
     <Layout>
+      <Head>
+        <title>{post.title}</title>
+        <link rel="icon" href="/pngegg.png"></link>
+      </Head>
       <div className="Post_page">
         <header>
           <hi className="Title">{post.title}</hi>
         </header>
-        <div className="category">{post.category}</div>
-        <time dateTime="post.category">
+        <div className="post_tag_list">
+          {post.tag.map((data) => (
+            <div className="post_tag_item" key={data}>
+              {data}
+            </div>
+          ))}
+        </div>
+        <time dateTime={moment(post.createdAt).format('YYYY-MM-DD')}>
           {moment(post.createdAt).format('YYYY-MM-DD')}
         </time>
         <EditerView text={post.body} />

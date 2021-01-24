@@ -9,11 +9,24 @@ header {
   margin-bottom: 2rem;
 }
 
-.category {
+.post_tag_list {
+  display: flex;
   font-weight: 1000;
-  color: black;
-  display: inline;
-  margin: 2rem;
+  flex-wrap: wrap;
+  padding: 0 0.5rem 0 0.5rem;
+}
+
+.post_tag_item {
+  border-radius: 10px;
+  padding: 4px 10px 4px 10px;
+  color: white;
+  background: rgb(165, 165, 165);
+  margin-right: 10px;
+  margin-top: 2px;
+}
+
+.ck-content {
+  margin-top: 1rem;
 }
 
 .body {

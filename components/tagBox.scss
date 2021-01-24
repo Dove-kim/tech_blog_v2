@@ -1,0 +1,73 @@
+.tag_box {
+  width: 100%;
+  padding-top: 1rem;
+}
+
+.tag_form {
+  border-radius: 2px;
+  overflow: hidden;
+  display: flex;
+  width: 256px;
+  border: 1px solid #c7c7c7;
+
+  input,
+  button {
+    outline: none;
+    border: none;
+    font-size: 1rem;
+  }
+
+  input {
+    padding: 0.35rem;
+    flex: 1;
+    min-width: 0;
+  }
+
+  button {
+    cursor: pointer;
+    padding-right: 1rem;
+    padding-left: 1rem;
+    border: none;
+    background: #c7c7c7;
+    color: black;
+    font-weight: bold;
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+}
+
+.tag_item {
+  margin-right: 0.5rem;
+  color: black;
+  cursor: pointer;
+  &:hover {
+    opacity: 0.5;
+  }
+}
+
+.tag_list {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+.search_prev_list {
+  position: absolute;
+  background-color: #f1f1f1;
+  min-width: 194px;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+}
+
+.search_prev_list div {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+
+  &:hover {
+    background-color: #ddd;
+    cursor: pointer;
+  }
+}

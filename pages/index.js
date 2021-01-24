@@ -3,12 +3,12 @@ import PostItem from '../components/postItem';
 
 export const getServerSideProps = async (context) => {
   let res = null;
-  const category = context.query.category
-    ? context.query.category >= 0
-      ? context.query.category
+  const tag = context.query.tag
+    ? context.query.tag >= 0
+      ? context.query.tag
       : -1
     : -1;
-  res = await fetch(`https://tech.dpot.xyz/api/post?category=${category}`);
+  res = await fetch(`https://front.dpot.xyz/api/post?tag=${tag}`);
 
   const posts = await res.json();
 
@@ -35,7 +35,7 @@ const Index = ({ posts }) => {
               key={post.no}
               postNo={post.no}
               title={post.title}
-              category={post.category}
+              tag={post.tag}
               body={post.body}
               date={post.createdAt}
             />

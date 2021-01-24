@@ -51,6 +51,7 @@ app.prepare().then(() => {
   server.use('/api/auth', require('./auth'));
   server.use('/api/post', require('./post'));
   server.use('/api/category', require('./category'));
+  server.use('/api/tag', require('./tag'));
   server.use('/', express.static(setting.public_src));
 
   server.get('/admin/', (req, res) => {
