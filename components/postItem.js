@@ -22,7 +22,7 @@ const PostItem = ({ title, postNo, tag, date, body }) => {
           .replace(/&nbsp;?/gm, '')
           .slice(0, 200)}
       </h2>
-      <span>{moment(date).format('YYYY-MM-DD')}</span>
+      <span>{date.substring(0, 10)}</span>
     </div>
   );
 };

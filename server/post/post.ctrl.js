@@ -12,28 +12,10 @@ exports.list = async (req, res) => {
       tag > 0
         ? ` and post.no in (select post_no from post_tag where tag_no=${tag})`
         : ''
-    };`,
+    } order by post.createdAt asc;`,
   );
 
-  let map = new Map();
-  let resData = [];
-
-  data.map((item) => {
-    if (map.has(item.no)) {
-      resData[map.get(item.no)].tag.push(item.tag);
-    } else {
-      map.set(item.no, resData.length);
-      resData.push({
-        no: item.no,
-        title: item.title,
-        body: item.body,
-        createdAt: item.createdAt,
-        tag: [item.tag],
-      });
-    }
-  });
-
-  res.send(resData);
+  res.send(data);
 };
 
 exports.write = async (req, res) => {
@@ -95,7 +77,16 @@ exports.delete = async (req, res) => {
     }
     const post = await req.params.postId;
 
+    //게시글 삭제
     let sql = await db.excute('delete from post where no=?', [post]);
+    //게시글에 없는 태그 삭제
+    sql = await db.excute(
+      'delete from tag where no in (select * from (select no from tag left join post_tag on post_tag.tag_no = tag.no where post_tag.post_no is null)as t);',
+    );
+    //이미지 삭제
+    if (data.img) {
+      await util.delete(data.img);
+    }
     res.send({ result: 'yes' });
     return;
   }

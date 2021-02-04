@@ -8,7 +8,7 @@ export const getServerSideProps = async (context) => {
       ? context.query.tag
       : -1
     : -1;
-  res = await fetch(`https://front.dpot.xyz/api/post?tag=${tag}`);
+  res = await fetch(`https://tech.dpot.xyz/api/post?tag=${tag}`);
 
   const posts = await res.json();
 
@@ -17,6 +17,16 @@ export const getServerSideProps = async (context) => {
       notFound: true,
     };
   }
+  //날짜순으로 오름차순
+  posts.sort(function (a, b) {
+    if (a.createdAt > b.createdAt) {
+      return -1;
+    }
+    if (a.createdAt < b.createdAt) {
+      return 1;
+    }
+    return 0;
+  });
 
   return {
     props: {

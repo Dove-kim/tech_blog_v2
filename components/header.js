@@ -15,6 +15,11 @@ const Header = () => {
       <Head>
         <title>TechPot</title>
         <link rel="icon" href="/pngegg.png"></link>
+        <script
+          type="text/javascript"
+          src="//t1.daumcdn.net/kas/static/ba.min.js"
+          async
+        ></script>
       </Head>
       <div className="wrapper" onClick={getBacktoMain}>
         <p className="logo">Mark의 개발블로그</p>

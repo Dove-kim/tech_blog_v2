@@ -1,8 +1,8 @@
 import Layout from '../../components/layout';
 import './post.scss';
 import dynamic from 'next/dynamic';
-import moment from 'moment';
 import Head from 'next/head';
+import Loading from '../../components/loading';
 
 const EditerView = dynamic(() => import('../../components/post'), {
   ssr: false,
@@ -15,7 +15,7 @@ export const getServerSideProps = async (context) => {
   const postNo = context.params.id;
   let res = null;
 
-  res = await fetch(`https://front.dpot.xyz/api/post/${postNo}`);
+  res = await fetch(`https://tech.dpot.xyz/api/post/${postNo}`);
 
   const post = await res.json();
 
@@ -35,8 +35,16 @@ const Post = ({ postNo, post }) => {
     <Layout>
       <Head>
         <title>{post.title}</title>
+        <meta
+          name="description"
+          content={post.body
+            .replace(/<[^>]*>?/gm, '')
+            .replace(/&nbsp;?/gm, '')
+            .slice(0, 200)}
+        />
         <link rel="icon" href="/pngegg.png"></link>
       </Head>
+      <Loading />
       <div className="Post_page">
         <header>
           <hi className="Title">{post.title}</hi>
@@ -48,8 +56,8 @@ const Post = ({ postNo, post }) => {
             </div>
           ))}
         </div>
-        <time dateTime={moment(post.createdAt).format('YYYY-MM-DD')}>
-          {moment(post.createdAt).format('YYYY-MM-DD')}
+        <time dateTime={post.createdAt.substring(0, 10)}>
+          {post.createdAt.substring(0, 10)}
         </time>
         <EditerView text={post.body} />
         <div
@@ -60,6 +68,13 @@ const Post = ({ postNo, post }) => {
         />
       </div>
       <footer>
+        <ins
+          className="kakao_ad_area"
+          style={{ display: 'none' }}
+          data-ad-unit="DAN-mJJ9zuJ0dgoJ1w2v"
+          data-ad-width="320"
+          data-ad-height="100"
+        ></ins>
         <Comments />
       </footer>
     </Layout>

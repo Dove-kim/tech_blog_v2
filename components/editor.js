@@ -30,7 +30,6 @@ const editorConfiguration = {
       'highlight',
       '|',
       'imageInsert',
-      'mediaEmbed',
       'insertTable',
       '|',
       'undo',
@@ -39,6 +38,7 @@ const editorConfiguration = {
       'MathType',
       'ChemType',
       'underline',
+      'HtmlEmbed',
     ],
   },
   language: 'ko',
@@ -129,7 +129,7 @@ const EditorView = () => {
     if (postno > 0) {
       axios.get('/api/post/' + postno).then((data) => {
         data = data.data;
-        console.log(data);
+        //console.log(data);
         if (data.result == false) {
           //window.location.href = '/';
         }
@@ -218,7 +218,7 @@ const EditorView = () => {
       innerHTML = await Base64toServerImage(content, data);
     }
 
-    console.log(localTags);
+    //console.log(localTags);
 
     axios
       .post('/api/post', {
@@ -249,10 +249,16 @@ const EditorView = () => {
     if (post_no < 0) {
       return;
     }
+
+    let files = context
+      .split('src="')
+      .filter((v) => v.startsWith('/blog_img'))
+      .map((v) => v.split('"')[0]);
+
     if (confirm('삭제할꺼?')) {
       axios
         .delete('/api/post/' + post_no, {
-          data: { token: jsCookie.get('token') },
+          data: { token: jsCookie.get('token'), img: files },
         })
         .then((data) => {
           data = data.data;
@@ -263,7 +269,7 @@ const EditorView = () => {
           }
         });
     }
-  }, [post_no]);
+  }, [post_no, context]);
 
   const onTitleChange = useCallback(
     (e) => {
