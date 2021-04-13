@@ -12,10 +12,28 @@ exports.list = async (req, res) => {
       tag > 0
         ? ` and post.no in (select post_no from post_tag where tag_no=${tag})`
         : ''
-    } order by post.createdAt asc;`,
+    } order by post.createdAt desc ,tag.name asc;`,
   );
 
-  res.send(data);
+  const posts = data;
+  const postsList = [];
+  const map = new Map();
+  for (let i = 0; i < posts.length; i++) {
+    if (map.has(posts[i].no)) {
+      postsList[map.get(posts[i].no)].tag.push(posts[i].tag);
+    } else {
+      map.set(posts[i].no, postsList.length);
+      postsList.push({
+        no: posts[i].no,
+        title: posts[i].title,
+        body: posts[i].body,
+        createdAt: posts[i].createdAt,
+        tag: [posts[i].tag],
+      });
+    }
+  }
+
+  res.send(postsList);
 };
 
 exports.write = async (req, res) => {

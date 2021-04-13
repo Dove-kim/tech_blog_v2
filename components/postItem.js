@@ -1,27 +1,34 @@
 import './postItem.scss';
-import moment from 'moment';
 
 const PostItem = ({ title, postNo, tag, date, body }) => {
   const go = () => {
     window.location.href = '/post/' + postNo;
   };
 
+  let tagList = null;
+  if (Array.isArray(tag)) {
+    tagList = [];
+    for (let i = 0; i < tag.length; i++) {
+      tagList.push(
+        <div className="index_tag_item" key={tag[i]}>
+          {tag[i]}
+        </div>,
+      );
+    }
+  } else {
+    tagList = tag;
+  }
+
   return (
     <div className="PostItem" onClick={go}>
-      <h1>{title}</h1>
-      <div className="index_tag_list">
-        {tag.map((data) => (
-          <div className="index_tag_item" key={data}>
-            {data}
-          </div>
-        ))}
-      </div>
-      <h2>
+      <h2>{title}</h2>
+      <div className="index_tag_list">{tagList}</div>
+      <h3>
         {body
           .replace(/<[^>]*>?/gm, '')
           .replace(/&nbsp;?/gm, '')
           .slice(0, 200)}
-      </h2>
+      </h3>
       <span>{date.substring(0, 10)}</span>
     </div>
   );

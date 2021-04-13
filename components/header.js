@@ -22,7 +22,7 @@ const Header = () => {
         ></script>
       </Head>
       <div className="wrapper" onClick={getBacktoMain}>
-        <p className="logo">Mark의 개발블로그</p>
+        <h1 className="logo">DPot의 개발블로그</h1>
         <img src="/pngegg.png"></img>
       </div>
       <div

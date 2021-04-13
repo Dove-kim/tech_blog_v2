@@ -1,3 +1,4 @@
+import Axios from 'axios';
 import Layout from '../components/layout';
 import PostItem from '../components/postItem';
 
@@ -8,25 +9,9 @@ export const getServerSideProps = async (context) => {
       ? context.query.tag
       : -1
     : -1;
-  res = await fetch(`https://tech.dpot.xyz/api/post?tag=${tag}`);
+  res = await Axios.get(`https://tech.dpot.xyz/api/post?tag=${tag}`);
 
-  const posts = await res.json();
-
-  if (posts.length == 0) {
-    return {
-      notFound: true,
-    };
-  }
-  //날짜순으로 오름차순
-  posts.sort(function (a, b) {
-    if (a.createdAt > b.createdAt) {
-      return -1;
-    }
-    if (a.createdAt < b.createdAt) {
-      return 1;
-    }
-    return 0;
-  });
+  const posts = res.data;
 
   return {
     props: {
